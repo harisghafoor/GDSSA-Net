@@ -37,6 +37,9 @@ from config import (
     WIDTH,
     WEIGHTED_COEFF_MAIN_LOSS,
     WEIGHTED_COEFF_AUX_LOSS,
+    DEFAULT_BATCH_SIZE,
+    DEFAULT_NUM_EPOCHS,
+    DEFAULT_LR,
 )
 
 
@@ -142,30 +145,58 @@ def evaluate(model, loader, loss_fn, device):
 
 
 if __name__ == "__main__":
-
     # Define default values for arguments
     DEFAULT_DATA_DIR = "/path/to/dataset"
     DEFAULT_OUTPUT_DIR = "/output/path"
     DEFAULT_EXPERIMENT_NAME = "MyExperiment"
     DEFAULT_BATCH_SIZE = 16
     DEFAULT_NUM_EPOCHS = 100
-    DEFAULT_LR = 0.01
     DEFAULT_DEVICE = "cuda:0"
     DEFAULT_PARENT_DIR = "BestFoldAttentionUnetDDTI"
     DEFAULT_AUGMENTED_DATA = "augmented_data_ddti"
     DEFAULT_FOLD = "fold_2"
 
-    parser = argparse.ArgumentParser(description="Lung Nodule Segmentation Training Script")
+    parser = argparse.ArgumentParser(
+        description="Lung Nodule Segmentation Training Script"
+    )
 
-    parser.add_argument("--data_dir", default=DEFAULT_DATA_DIR, help="Path to the dataset directory")
-    parser.add_argument("--output_dir", default=DEFAULT_OUTPUT_DIR, help="Path to the output directory")
-    parser.add_argument("--experiment_name", default=DEFAULT_EXPERIMENT_NAME, help="Name of the experiment")
-    parser.add_argument("--batch_size", type=int, default=DEFAULT_BATCH_SIZE, help="Batch size for training")
-    parser.add_argument("--num_epochs", type=int, default=DEFAULT_NUM_EPOCHS, help="Number of training epochs")
+    parser.add_argument(
+        "--data_dir", default=DEFAULT_DATA_DIR, help="Path to the dataset directory"
+    )
+    parser.add_argument(
+        "--output_dir", default=DEFAULT_OUTPUT_DIR, help="Path to the output directory"
+    )
+    parser.add_argument(
+        "--experiment_name",
+        default=DEFAULT_EXPERIMENT_NAME,
+        help="Name of the experiment",
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=DEFAULT_BATCH_SIZE,
+        help="Batch size for training",
+    )
+    parser.add_argument(
+        "--num_epochs",
+        type=int,
+        default=DEFAULT_NUM_EPOCHS,
+        help="Number of training epochs",
+    )
     parser.add_argument("--lr", type=float, default=DEFAULT_LR, help="Learning rate")
-    parser.add_argument("--device", default=DEFAULT_DEVICE, help="Device for training (e.g., 'cuda:0' or 'cpu')")
-    parser.add_argument("--PARENT_DIR", default=DEFAULT_PARENT_DIR, help="Root directory of checkpoints")
-    parser.add_argument("--augmented_data", default=DEFAULT_AUGMENTED_DATA, help="Directory of Augmented Images")
+    parser.add_argument(
+        "--device",
+        default=DEFAULT_DEVICE,
+        help="Device for training (e.g., 'cuda:0' or 'cpu')",
+    )
+    parser.add_argument(
+        "--PARENT_DIR", default=DEFAULT_PARENT_DIR, help="Root directory of checkpoints"
+    )
+    parser.add_argument(
+        "--augmented_data",
+        default=DEFAULT_AUGMENTED_DATA,
+        help="Directory of Augmented Images",
+    )
     parser.add_argument("--fold", default=DEFAULT_FOLD, help="Name of the fold")
 
     args = parser.parse_args()
@@ -202,8 +233,8 @@ if __name__ == "__main__":
     valid_x, valid_y = zip(*valid_paths)
 
     # Hyperparameters
-    H = 256
-    W = 256
+    H = HEIGHT
+    W = WIDTH
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     lr = args.lr
@@ -213,15 +244,15 @@ if __name__ == "__main__":
         train_x,
         train_y,
         image_size=(H, W),
-        kernel_size_1=15,
-        kernel_size_2=21,
+        kernel_size_1=KERNEL_DILATION_1,
+        kernel_size_2=KERNEL_DILATION_2,
     )
     valid_dataset = DataLungNodulesLoader(
         valid_x,
         valid_y,
         image_size=(H, W),
-        kernel_size_1=15,
-        kernel_size_2=25,
+        kernel_size_1=KERNEL_DILATION_1,
+        kernel_size_2=KERNEL_DILATION_2,
     )
 
     train_loader = DataLoader(
@@ -281,7 +312,8 @@ if __name__ == "__main__":
 
     # Last Iteration model
     torch.save(
-        model.state_dict(), os.path.join(args.output_dir, f"{args.experiment_name}_LastIteration.pth")
+        model.state_dict(),
+        os.path.join(args.output_dir, f"{args.experiment_name}_LastIteration.pth"),
     )
     # Close the TensorBoard writer when finished logging
     writer.close()
