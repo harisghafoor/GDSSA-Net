@@ -1,4 +1,4 @@
-# Official Implementation of Deep Attentive & Edge Crafted Gradual Supervision 
+# Official Implementation of Gradually Deeply Supervised Self-Ensemble Attention Based Network for Thyroid Nodule Segmentation 
 
 Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
 
@@ -25,6 +25,7 @@ Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
         <img src="./figures/ComboROCCurves_revised.png" width="79%"/>
     </a>
 </div>
+
 ## Installation
 
 Conda environment (recommended)
@@ -38,27 +39,10 @@ conda env create -f environment.yml
 
 ## Testing
 
-[`yolov7.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt) [`yolov7x.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7x.pt) [`yolov7-w6.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-w6.pt) [`yolov7-e6.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6.pt) [`yolov7-d6.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt) [`yolov7-e6e.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt)
+[`model.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt)
 
 ``` shell
-python test.py --data data/coco.yaml --img 640 --batch 32 --conf 0.001 --iou 0.65 --device 0 --weights yolov7.pt --name yolov7_640_val
-```
-
-You will get the results:
-
-```
- Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.51206
- Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.69730
- Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.55521
- Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.35247
- Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.55937
- Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.66693
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.38453
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.63765
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.68772
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.53766
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.73549
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.83868
+python src/test.py --fold fold_2 --experiment_name Thyroid_Segmentation_Experiment --checkpoint_path checkpoints/model.pth --device cpu --thresholds 0.5 0.1 0.1 0.5 --json_file tn3k_combo_folds.json
 ```
 
 ## Training
@@ -66,81 +50,40 @@ You will get the results:
 Data preparation
 
 ``` shell
-bash scripts/get_coco.sh
+bash scripts/get_data.sh
 ```
 
-* Download MS COCO dataset images ([train](http://images.cocodataset.org/zips/train2017.zip), [val](http://images.cocodataset.org/zips/val2017.zip), [test](http://images.cocodataset.org/zips/test2017.zip)) and [labels](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/coco2017labels-segments.zip). If you have previously used a different version of YOLO, we strongly recommend that you delete `train2017.cache` and `val2017.cache` files, and redownload [labels](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/coco2017labels-segments.zip) 
+* Download the data from the drive ([Link](https://drive.google.com/drive/folders/1UIaCimog2VWt3iHEGDCG7o2ZCsSAMi7E?usp=drive_link)
 
-Single GPU training
+Training
 
 ``` shell
-# train p5 models
-python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml
 
-# train p6 models
-python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
+python src/train.py --data_dir datasets/Thyroid\ Dataset/tn3k --output_dir output --experiment_name Thyroid_Segmentation_Experiment --batch_size 16 --num_epochs 100 --device cpu --PARENT_DIR BestFoldAttentionUnetDDTI --augmented_data augmented_data_ddti --fold fold_2
+
 ```
 
 
 ## Citation
 
 ```
-@inproceedings{wang2023yolov7,
-  title={{YOLOv7}: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors},
-  author={Wang, Chien-Yao and Bochkovskiy, Alexey and Liao, Hong-Yuan Mark},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year={2023}
+@inproceedings{harisgdssa2024,
+  title={{GDSSA}: Gradually Deeply Supervised Self-Ensemble Attention Based Network for Thyroid Nodule Segmentation},
+  author={haris,usman,umar,azka and -},
+  journal={Bio-engineering,2024 (MDPI)},
+  year={2024}
 }
-```
 
-```
-@article{wang2023designing,
-  title={Designing Network Design Strategies Through Gradient Path Analysis},
-  author={Wang, Chien-Yao and Liao, Hong-Yuan Mark and Yeh, I-Hau},
-  journal={Journal of Information Science and Engineering},
-  year={2023}
-}
 ```
 
 
 ## Example Visualizations
 
-YOLOv7-semantic & YOLOv7-panoptic & YOLOv7-caption
+TN3k Dataset : 
 
 <div align="center">
     <a href="./">
-        <img src="./figure/tennis.jpg" width="24%"/>
-    </a>
-    <a href="./">
-        <img src="./figure/tennis_semantic.jpg" width="24%"/>
-    </a>
-    <a href="./">
-        <img src="./figure/tennis_panoptic.png" width="24%"/>
-    </a>
-    <a href="./">
-        <img src="./figure/tennis_caption.png" width="24%"/>
-    </a>
-</div>
-![alt text](image.png)
-YOLOv7-semantic & YOLOv7-detection & YOLOv7-depth (with NTUT)
-
-<div align="center">
-    <a href="./">
-        <img src="./figure/yolov7_city.jpg" width="80%"/>
-    </a>
-</div>
-
-YOLOv7-3d-detection & YOLOv7-lidar & YOLOv7-road (with NTUT)
-
-<div align="center">
-    <a href="./">
-        <img src="./figure/yolov7_3d.jpg" width="30%"/>
-    </a>
-    <a href="./">
-        <img src="./figure/yolov7_lidar.jpg" width="30%"/>
-    </a>
-    <a href="./">
-        <img src="./figure/yolov7_road.jpg" width="30%"/>
+        <img src="./figures/viz_tn3k.png" width="80%"/>
     </a>
 </div>
 
