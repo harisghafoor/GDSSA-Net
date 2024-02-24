@@ -84,6 +84,7 @@ def augment_data(images, masks, save_path, augment=True):
 
 
 if __name__ == "__main__":
+    
     parser = argparse.ArgumentParser(description="Data Augmentation Script")
     parser.add_argument("--data_path", required=True, help="Path to the data folder")
     parser.add_argument(

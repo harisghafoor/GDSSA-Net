@@ -10,8 +10,8 @@ def create_folds(data_paths, save_path, num_folds):
     all_y = []
 
     for data_path in data_paths:
-        x = sorted(glob(os.path.join(data_path, "images/*")))
-        y = sorted(glob(os.path.join(data_path, "masks/*")))
+        x = sorted(glob(os.path.join(data_path[0], "*")))
+        y = sorted(glob(os.path.join(data_path[1], "*")))
         assert len(x) == len(y), "Number of images and masks must match."
 
         all_x.extend(x)
@@ -31,14 +31,25 @@ def create_folds(data_paths, save_path, num_folds):
 
 
 if __name__ == "__main__":
+    # Define default paths
+    DEFAULT_DATA_PATHS = [
+       ("/Users/harisghafoor/Documents/GitHub/DeepAttent-EdgeCraft-Gradual-Supervision-for-Superior-Segmentation/datasets/Thyroid Dataset/tn3k/trainval-image",
+        "/Users/harisghafoor/Documents/GitHub/DeepAttent-EdgeCraft-Gradual-Supervision-for-Superior-Segmentation/datasets/Thyroid Dataset/tn3k/trainval-mask"),
+        ("/Users/harisghafoor/Documents/GitHub/DeepAttent-EdgeCraft-Gradual-Supervision-for-Superior-Segmentation/datasets/Thyroid Dataset/tn3k/test-image",
+        "/Users/harisghafoor/Documents/GitHub/DeepAttent-EdgeCraft-Gradual-Supervision-for-Superior-Segmentation/datasets/Thyroid Dataset/tn3k/test-mask")
+    ]  # Add your default data paths here
+    
+    DEFAULT_SAVE_PATH = "tn3k_combo_folds.json"  # Specify your default save path here
+    DEFAULT_NUM_FOLDS = 10  # Specify the default number of folds here
+    
     parser = argparse.ArgumentParser(description="Create Folds Script")
     parser.add_argument(
-        "--data_paths", required=True, nargs="+", help="List of data paths"
+        "--data_paths", nargs="+", default=DEFAULT_DATA_PATHS, help="List of data paths"
     )
     parser.add_argument(
-        "--save_path", required=True, help="Path to save the folds JSON"
+        "--save_path", default=DEFAULT_SAVE_PATH, help="Path to save the folds JSON"
     )
-    parser.add_argument("--num_folds", type=int, required=True, help="Number of folds")
+    parser.add_argument("--num_folds", type=int, default=DEFAULT_NUM_FOLDS, help="Number of folds")
     args = parser.parse_args()
 
     data_paths = args.data_paths
