@@ -1,8 +1,8 @@
 # No images to be pushed in the directory
-*.png
-*.jpg
-*.jpeg
-*.gif
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
 
 # No model weights to be pushed in the directory
 *.pth
@@ -10,3 +10,9 @@
 # No zip files
 
 *.zip
+
+# Ignore all files in the folder datasets
+datasets/
+
+# Ignore the notebooks
+*.ipynb
