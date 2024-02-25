@@ -183,7 +183,10 @@ if __name__ == "__main__":
         default=DEFAULT_NUM_EPOCHS,
         help="Number of training epochs",
     )
-    parser.add_argument("--lr", type=float, default=DEFAULT_LR, help="Learning rate")
+    parser.add_argument("--lr",
+                        type=float,
+                        default=DEFAULT_LR,
+                        help="Learning rate")
     parser.add_argument(
         "--device",
         default=DEFAULT_DEVICE,
@@ -293,8 +296,8 @@ if __name__ == "__main__":
 
             best_valid_loss = valid_loss
             torch.save(model.state_dict(), checkpoint_path)
-
-        scheduler.step(valid_loss)
+        else:
+            scheduler.step(valid_loss)
 
         end_time = time.time()
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
