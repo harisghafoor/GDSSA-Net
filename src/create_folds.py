@@ -6,6 +6,17 @@ from sklearn.model_selection import KFold
 
 
 def create_folds(data_paths, save_path, num_folds):
+    """
+    Create folds for cross-validation.
+
+    Args:
+        data_paths (list): List of tuples containing paths to input images and masks.
+        save_path (str): Path to save the folds as a JSON file.
+        num_folds (int): Number of folds to create.
+
+    Returns:
+        None
+    """
     all_x = []
     all_y = []
 

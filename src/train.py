@@ -45,6 +45,20 @@ from config import (
 
 # DataLoader(..., collate_fn=collate_fn)
 def train(model, loader, optimizer, loss_fn, device, loss_fn_boundary):
+    """
+    Trains the model using the provided data loader and optimizer.
+
+    Args:
+        model (torch.nn.Module): The model to be trained.
+        loader (torch.utils.data.DataLoader): The data loader containing the training data.
+        optimizer (torch.optim.Optimizer): The optimizer used for training.
+        loss_fn (torch.nn.Module): The loss function used to calculate the main loss.
+        device (torch.device): The device on which the training will be performed.
+        loss_fn_boundary (torch.nn.Module): The loss function used to calculate the boundary loss.
+
+    Returns:
+        tuple: A tuple containing the epoch loss, primary loss, and auxiliary loss.
+    """
     epoch_loss = 0.0
     epoch_primary_loss = 0.0
     epoch_auxiliary_loss = 0.0
@@ -58,13 +72,10 @@ def train(model, loader, optimizer, loss_fn, device, loss_fn_boundary):
         dilated_2 = dilated_2.to(device, dtype=torch.float32)
 
         optimizer.zero_grad()
-        y_pred, ds_out = model(
-            x
-        )  # ds_out = [ds_out3,ds_out4,ds_out5] -3 means the closest to output
-        # Main Loss
+        y_pred, ds_out = model(x)
+
         deepest_loss = loss_fn(y_pred, y)
         weighted_deepest_loss = WEIGHTED_COEFF_MAIN_LOSS * deepest_loss
-        # Equal weight of each aux loss
         ds_corr_weight = WEIGHTED_COEFF_AUX_LOSS / len(ds_out)
 
         if type(ds_out) is list:
@@ -72,23 +83,15 @@ def train(model, loader, optimizer, loss_fn, device, loss_fn_boundary):
             for ground_truth, deep_output in zip([dilated_2, dilated_1], ds_out[:-1]):
                 new_height = deep_output.size(-2)
                 new_width = deep_output.size(-1)
-                # Downsample the mask using bilinear interpolation
                 downsampled_mask = F.interpolate(
                     ground_truth,
                     size=(new_height, new_width),
                     mode="bilinear",
                     align_corners=True,
                 )
-                #                 print("Downsampled_Mask : ",downsampled_mask.shape)
-                #                 print("Output Prediction: ",deep_output.shape)
-                # Each deep supervision loss is weighted 20%
                 aux_loss = loss_fn(deep_output, downsampled_mask)
                 list_of_loss.append(ds_corr_weight * aux_loss)
-            #             print(ds_out[-1].shape)
-            #             print(contour.shape)
-            #             print(type(ds_out[-1]))
-            #             print(type(contour))
-            # Calcualting the Boundary Loss for the Bottleneck output
+
             contour_downsampled = F.interpolate(
                 contour,
                 size=(ds_out[-1].size(-2), ds_out[-1].size(-1)),
@@ -96,22 +99,15 @@ def train(model, loader, optimizer, loss_fn, device, loss_fn_boundary):
                 align_corners=True,
             )
             contour_downsampled = contour_downsampled.to(device, dtype=torch.float32)
-            #             print(ds_out[-1].shape)
-            #             print(contour_downsampled.shape)
-            #             print(type(ds_out[-1]))
-            #             print(type(contour_downsampled))
             list_of_loss.append(
                 ds_corr_weight
                 * loss_fn_boundary(pred=ds_out[-1], target=contour_downsampled)
             )
-            # Append the main output loss -> make sure it is properly weighted
             list_of_loss.append(weighted_deepest_loss)
-            # Create a stacked tensor
             stacked_tensors_of_weighted_aux_loss = torch.stack(list_of_loss)
-            # Sum over the dim 0
             loss = torch.sum(stacked_tensors_of_weighted_aux_loss, dim=0)
         else:
-            loss = deepest_loss  # Only true when the model only returns the main output
+            loss = deepest_loss
 
         loss.backward()
         optimizer.step()

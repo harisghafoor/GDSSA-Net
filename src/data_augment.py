@@ -136,4 +136,4 @@ if __name__ == "__main__":
         create_dir(f"{args.output_dir}/images")
         create_dir(f"{args.output_dir}/masks")
 
-        augment_data(images, masks, "augmented_data_ddti", augment=True)
+        augment_data(images, masks, "augmented_data", augment=True)
