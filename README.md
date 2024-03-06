@@ -7,7 +7,7 @@ Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
 
 <div align="center">
     <a href="./">
-        <img src="./figures/GDSSA-NET_v01.png" width="79%"/>
+        <img src="./figures/GDSSA-Net Diagram.png" width="79%"/>
     </a>
 </div>
 
