@@ -18,6 +18,7 @@ Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
         <img src="./figures/training_curves.png" width="79%"/>
     </a>
 </div>
+Figures labeled as Fig a and Fig b depict the training accuracy and loss respectively on the tn3k dataset. Similarly, Fig c and Fig d illustrate the training accuracy and loss on the ddti dataset.
 
 ### Testing Performance : 
 <div align="center">
@@ -25,6 +26,8 @@ Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
         <img src="./figures/ROC.png" width="79%"/>
     </a>
 </div>
+
+Fig a represents the ROC Curve for Tn3k dataset whereas Fig b represents the ROC curve obtained on ddti dataset. 
 
 ## Installation
 
