@@ -39,7 +39,7 @@ conda env create -f environment.yml
 
 ## Testing
 
-[`model.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt)
+[`model.pth`](https://drive.google.com/drive/folders/1BsYMs5CzG0CKHDCOHrYF7HKHpfA5newQ?usp=sharing)
 
 ``` shell
 python src/test.py --fold fold_2 --experiment_name Thyroid_Segmentation_Experiment --checkpoint_path checkpoints/model.pth --device cpu --thresholds 0.5 0.1 0.1 0.5 --json_file tn3k_combo_folds.json
