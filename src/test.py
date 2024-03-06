@@ -1,7 +1,17 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import json
 from operator import add
+import torch
+from torch.utils.data import DataLoader
+from torchvision.utils import make_grid
+from src.utils import seeding, create_dir, epoch_time
+from src.dataloader import DataLungNodulesLoader
+from src.models import AttentionUNetppGradual
+from src.loss import DiceLoss
+from src.config import KERNEL_DILATION_1, KERNEL_DILATION_2, BATCH_SIZE, HEIGHT, WIDTH
+import argparse
+
+import matplotlib.pyplot as plt
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -9,24 +19,8 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
-from torchvision.utils import make_grid
-
-from src.utils import seeding, create_dir, epoch_time
-from src.dataloader import DataLungNodulesLoader
-from src.models import AttentionUNetppGradual
-from src.loss import DiceLoss
-
-from src.config import (KERNEL_DILATION_1,
-                        KERNEL_DILATION_2,
-                        BATCH_SIZE,
-                        HEIGHT,WIDTH
-)
-import argparse
 
 
 def calculate_metrics(y_true, y_pred, threshold):
@@ -74,10 +68,19 @@ def save_decoder_outputs_to_disk(decoder_output, experiment_name):
         plt.imsave(output_filename, decoder_output_np, cmap="gray")
 
 
-def evaluate(model, loader, loss_fn, device, thresh):
-    epoch_loss = 0.0
-    model.eval()
+def test(model, loader, device, thresh):
+    """
+    Function to evaluate the performance of a model on a given dataset.
 
+    Args:
+        model (torch.nn.Module): The model to be evaluated.
+        loader (torch.utils.data.DataLoader): The data loader for the dataset.
+        device (torch.device): The device on which the evaluation will be performed.
+        thresh (list): A list of threshold values for prediction.
+
+    Returns:
+        None
+    """
     metrics_score = {
         "main_prediction": [0.0, 0.0, 0.0, 0.0, 0.0],
         "branch_1": [0.0, 0.0, 0.0, 0.0, 0.0],
@@ -85,7 +88,7 @@ def evaluate(model, loader, loss_fn, device, thresh):
         "branch_3": [0.0, 0.0, 0.0, 0.0, 0.0],
         "ensemble": [0.0, 0.0, 0.0, 0.0, 0.0],
     }
-
+    model.eval()
     with torch.no_grad():
         for x, y, y1, y2, y3 in loader:
             x = x.to(device, dtype=torch.float32)
@@ -95,8 +98,6 @@ def evaluate(model, loader, loss_fn, device, thresh):
             y_pred = y_pred.squeeze(0)
             y_pred = y_pred.squeeze(1)
             y = y.squeeze(1)
-
-            loss = loss_fn(y_pred, y)
             main_score = calculate_metrics(y_true=y, y_pred=y_pred, threshold=thresh[0])
             metrics_score["main_prediction"] = list(
                 map(add, metrics_score["main_prediction"], main_score)
@@ -121,10 +122,6 @@ def evaluate(model, loader, loss_fn, device, thresh):
                 ensemble_prediction, experiment_name + "_ensemble"
             )
 
-            epoch_loss += loss.item()
-
-        epoch_loss = epoch_loss / len(loader)
-
         metrics_summary = {}
         print("Length of Loader:", len(loader))
         for key, value in metrics_score.items():
@@ -140,7 +137,7 @@ def evaluate(model, loader, loss_fn, device, thresh):
             recall = value[2] / len(loader)
             precision = value[3] / len(loader)
             acc = value[4] / len(loader)
-            dsc = 1 - f1
+            dsc_loss = 1 - f1
 
             metrics_summary[branch_name] = {
                 "Jaccard": jaccard,
@@ -148,11 +145,11 @@ def evaluate(model, loader, loss_fn, device, thresh):
                 "Recall": recall,
                 "Precision": precision,
                 "Acc": acc,
-                "DSC": dsc,
+                "DSC": dsc_loss,
             }
 
             print(
-                f"{branch_name} - Jaccard: {jaccard:1.4f} - F1: {f1:1.4f} - Recall: {recall:1.4f} - Precision: {precision:1.4f} - Acc: {acc:1.4f} - DSC: {dsc:1.4f}"
+                f"{branch_name} - Jaccard: {jaccard:1.4f} - F1: {f1:1.4f} - Recall: {recall:1.4f} - Precision: {precision:1.4f} - Acc: {acc:1.4f} - DSC: {dsc_loss:1.4f}"
             )
 
         save_summary_to_file(metrics_summary, experiment_name)
@@ -191,8 +188,6 @@ if __name__ == "__main__":
     # Add other command-line arguments as needed
     args = parser.parse_args()
     PARENT_DIR = "BestFoldAttentionUnetPP_Type2"
-
-    seeding(42)
     # Load folds from the specified JSON file
     with open(args.json_file, "r") as f:
         folds = json.load(f)
@@ -202,22 +197,22 @@ if __name__ == "__main__":
     checkpoint_path = args.checkpoint_path
     train_paths, valid_paths = data["train"], data["val"]
 
-    valid_x, valid_y = zip(*valid_paths)
+    test_x, test_y = zip(*valid_paths)
 
     H = HEIGHT
     W = WIDTH
     size = (H, W)
-    batch_size = BATCH_SIZE 
-    valid_dataset = DataLungNodulesLoader(
-        valid_x,
-        valid_y,
+    batch_size = BATCH_SIZE
+    test_dataset = DataLungNodulesLoader(
+        test_x,
+        test_y,
         image_size=(H, W),
         kernel_size_1=KERNEL_DILATION_1,
         kernel_size_2=KERNEL_DILATION_2,
     )
 
-    valid_loader = DataLoader(
-        dataset=valid_dataset, batch_size=batch_size, shuffle=False, num_workers=2
+    test_loader = DataLoader(
+        dataset=test_dataset, batch_size=batch_size, shuffle=False, num_workers=2
     )
 
     device = args.device
@@ -227,7 +222,6 @@ if __name__ == "__main__":
         torch.load(checkpoint_path, map_location=device), strict=False
     )
     model = model.to(device)
-    loss_fn = DiceLoss()
 
     thresholds = args.thresholds
-    valid_loss = evaluate(model, valid_loader, loss_fn, device, thresh=thresholds)
+    test(model, test_loader, device, thresh=thresholds)
