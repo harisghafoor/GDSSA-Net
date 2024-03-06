@@ -7,7 +7,7 @@ Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
 
 <div align="center">
     <a href="./">
-        <img src="./figures/image.png" width="79%"/>
+        <img src="./figures/GDSSA-NET_v01.png" width="79%"/>
     </a>
 </div>
 
@@ -15,14 +15,14 @@ Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696)
 ### Training Performance: 
 <div align="center">
     <a href="./">
-        <img src="./figures/eval_curves.png" width="79%"/>
+        <img src="./figures/training_curves.png" width="79%"/>
     </a>
 </div>
 
 ### Testing Performance : 
 <div align="center">
     <a href="./">
-        <img src="./figures/ComboROCCurves_revised.png" width="79%"/>
+        <img src="./figures/ROC.png" width="79%"/>
     </a>
 </div>
 
@@ -65,8 +65,9 @@ python src/train.py --data_dir datasets/Thyroid\ Dataset/tn3k --output_dir outpu
 
 
 ## Citation
+<details><summary> <b>Expand</b> </summary>
 
-```
+<!-- ```
 @inproceedings{harisgdssa2024,
   title={{GDSSA}: Gradually Deeply Supervised Self-Ensemble Attention Based Network for Thyroid Nodule Segmentation},
   author={haris,usman,umar,azka and -},
@@ -74,7 +75,9 @@ python src/train.py --data_dir datasets/Thyroid\ Dataset/tn3k --output_dir outpu
   year={2024}
 }
 
-```
+``` -->
+</details> -->
+
 
 
 ## Example Visualizations
@@ -83,12 +86,12 @@ TN3k Dataset :
 
 <div align="center">
     <a href="./">
-        <img src="./figures/viz_tn3k.png" width="80%"/>
+        <img src="./figures/results_ddti.png" width="80%"/>
     </a>
 </div>
 
 
-## Acknowledgements
+<!-- ## Acknowledgements
 
 <details><summary> <b>Expand</b> </summary>
 
@@ -103,4 +106,4 @@ TN3k Dataset :
 * [https://github.com/JUGGHM/OREPA_CVPR2022](https://github.com/JUGGHM/OREPA_CVPR2022)
 * [https://github.com/TexasInstruments/edgeai-yolov5/tree/yolo-pose](https://github.com/TexasInstruments/edgeai-yolov5/tree/yolo-pose)
 
-</details>
+</details> -->
