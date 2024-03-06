@@ -1,19 +1,20 @@
 import os
 import time
-from glob import glob
 import random
 import json
+import argparse
 import torch
 from torch.utils.data import DataLoader
-import argparse  # Import argparse for command-line arguments
-
-# from dataloader import T_Data
+from torch.utils.tensorboard import SummaryWriter
+import warnings
+from glob import glob
 from dataloader import DataLungNodulesLoader
-
-# from model import VNet
-# from attention_unet import AttentionUNet
-# from deep_sup_attention_unet_type2 import AttentionUNetpp
 from models import AttentionUNetppGradual
+from utils import seeding, create_dir, epoch_time
+
+import torch.nn.functional as F
+
+
 from loss import (
     DiceLoss,
     DiceBCELoss,
@@ -22,12 +23,8 @@ from loss import (
     DiceLoss_V1,
     DiceTestingScore,
 )
-from utils import seeding, create_dir, epoch_time
-import warnings
 
 warnings.filterwarnings("ignore")
-from torch.utils.tensorboard import SummaryWriter
-import torch.nn.functional as F
 
 from config import (
     KERNEL_DILATION_1,

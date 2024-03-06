@@ -63,6 +63,14 @@ class AttentionBlock(nn.Module):
 
 
 class AttentionUNetppGradual(nn.Module):
+    """
+    AttentionUNetppGradual is a class that implements the Attention UNet++ model with gradual supervision for superior segmentation.
+
+    Args:
+        img_ch (int): Number of input channels (default: 3)
+        output_ch (int): Number of output channels (default: 1)
+    """
+
     def __init__(self, img_ch=3, output_ch=1):
         super(AttentionUNetppGradual, self).__init__()
 
@@ -99,78 +107,64 @@ class AttentionUNetppGradual(nn.Module):
         self.Conv_ds2 = nn.Conv2d(64, output_ch, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
-#         print(f"Input Image Shape: {x.shape}")
+        """
+        Forward pass of the AttentionUNetppGradual model.
 
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, channels, height, width)
+
+        Returns:
+            out (torch.Tensor): Output tensor of shape (batch_size, output_channels, height, width)
+            ds_out (list): List of deep supervision outputs, each of shape (batch_size, output_channels, height, width)
+        """
         e1 = self.Conv1(x)
-        print(f"e1: {e1.shape}")
-
         e2 = self.MaxPool(e1)
         e2 = self.Conv2(e2)
-        print(f"e2: {e2.shape}")
-
         e3 = self.MaxPool(e2)
         e3 = self.Conv3(e3)
-        print(f"e3: {e3.shape}")
-
         e4 = self.MaxPool(e3)
         e4 = self.Conv4(e4)
-        print(f"e4: {e4.shape}")
-
         e5 = self.MaxPool(e4)
         e5 = self.Conv5(e5)
-        print(f"e5: {e5.shape}")
 
         d5 = self.Up5(e5)
         s4 = self.Att5(gate=d5, skip_connection=e4)
         d5 = torch.cat((s4, d5), dim=1)
         d5 = self.UpConv5(d5)
-        print(f"d5: {d5.shape}")
 
         d4 = self.Up4(d5)
         s3 = self.Att4(gate=d4, skip_connection=e3)
         e3_upsampled = F.interpolate(e3, size=d4.size()[2:], mode='bilinear', align_corners=True)
         d4 = torch.cat((s3, d4), dim=1)
         d4 = self.UpConv4(d4)
-        print(f"d4: {d4.shape}")
 
         d3 = self.Up3(d4)
         s2 = self.Att3(gate=d3, skip_connection=e2)
         e2_upsampled = F.interpolate(e2, size=d3.size()[2:], mode='bilinear', align_corners=True)
         d3 = torch.cat((s2, d3), dim=1)
         d3 = self.UpConv3(d3)
-        print(f"d3 (Second Last Decoder Output): {d3.shape}")
 
         d2_intermediate = self.Up2(d3)
         s1 = self.Att2(gate=d2_intermediate, skip_connection=e1)
         e1_upsampled = F.interpolate(e1, size=d2_intermediate.size()[2:], mode='bilinear', align_corners=True)
         d2_intermediate = torch.cat((s1, d2_intermediate), dim=1)
         d2_intermediate = self.UpConv2(d2_intermediate)
-        print(f"d2_intermediate: {d2_intermediate.shape}")
 
         d2 = self.Up2(d3)
         s1 = self.Att2(gate=d2, skip_connection=e1)
         e1_upsampled = F.interpolate(e1, size=d2.size()[2:], mode='bilinear', align_corners=True)
         d2 = torch.cat((s1, d2), dim=1)
         d2 = self.UpConv2(d2)
-        print(f"d2: {d2.shape}")
 
         out = self.final_conv(d2)
-#         print(f"out: {out.shape}")
 
         # Deep supervision outputs
         ds_out5 = self.Conv_ds5(d5)
         ds_out4 = self.Conv_ds4(d4)
         ds_out3 = self.Conv_ds3(d3)
         ds_out2 = self.Conv_ds2(d2_intermediate)
-#         print("x.size()[2:]",x.size()[2:])
-        
-#         ds_out3 = F.interpolate(ds_out3, size=(x.size()[2], x.size()[3]), mode='bilinear', align_corners=True)
-        print(f"ds_out5: {ds_out5.shape}")
-        print(f"ds_out4: {ds_out4.shape}")
-        print(f"ds_out3: {ds_out3.shape}")
-        print(f"ds_out2: {ds_out2.shape}")
-        # return out, [ds_out2,ds_out3,ds_out4,ds_out5]  
-        return out, [ds_out3,ds_out4,ds_out5] 
+
+        return out, [ds_out3, ds_out4, ds_out5]
 
 
 if __name__ == "__main__":
