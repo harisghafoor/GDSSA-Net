@@ -2,7 +2,7 @@
 
 Official Pytorch Implementation of GDSSA-Net: Gradually Deeply Supervised Self-Ensemble Attention Based Network for Thyroid Nodule Segmentation
 ## Model
-The Gradually Deeply Supervised Self-Ensemble Attention Network (GDSSA-Net) is a novel framework designed for the precise segmentation of thyroid nodules in ultrasound images, employing a gated attention mechanism and a unique Gradual Deep Supervision strategy to enhance segmentation accuracy effectively. This approach not only outperforms existing models in terms of segmentation performance but also maintains computational efficiency, making it ideal for real-time clinical applications.
+The Gradually Deeply Supervised Self-Ensemble Attention Network (GDSSA-Net) is a novel framework designed for the precise segmentation of thyroid nodules in ultrasound images, employing a gated attention mechanism and a unique Gradual Deep Supervision strategy to enhance segmentation accuracy effectively. This approach not only outperforms existing models in terms of segmentation performance but also maintains computational efficiency, making it ideal for real-time clinical employment.
 <!-- Implementation of paper - [Title of Paper](https://arxiv.org/abs/2207.02696) -->
 
 <!-- <a href="https://colab.research.google.com/gist/AlexeyAB/b769f5795e65fdab80086f6cb7940dae/yolov7detection.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a> -->
